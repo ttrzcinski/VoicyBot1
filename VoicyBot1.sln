@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoicyBot1", "VoicyBot1\VoicyBot1.csproj", "{6B84B3EF-FD1D-4490-BBE7-5A7BBE14DF4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VoicyBot1", "VoicyBot1\VoicyBot1.csproj", "{6B84B3EF-FD1D-4490-BBE7-5A7BBE14DF4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoicyBot1Tests", "VoicyBot1Tests\VoicyBot1Tests.csproj", "{4949311B-4F46-4FD9-A146-0830EFB69E11}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{6B84B3EF-FD1D-4490-BBE7-5A7BBE14DF4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B84B3EF-FD1D-4490-BBE7-5A7BBE14DF4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B84B3EF-FD1D-4490-BBE7-5A7BBE14DF4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4949311B-4F46-4FD9-A146-0830EFB69E11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4949311B-4F46-4FD9-A146-0830EFB69E11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4949311B-4F46-4FD9-A146-0830EFB69E11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4949311B-4F46-4FD9-A146-0830EFB69E11}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

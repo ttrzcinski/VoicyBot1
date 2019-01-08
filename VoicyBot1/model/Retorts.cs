@@ -94,7 +94,7 @@ namespace VoicyBot1.model
             // Load retors from a file
             string retortFileContent = File.ReadAllText(path);
             _logger.LogInformation("Load - Reads - " + retortFileContent);
-            Dictionary<string, string> result = utilJson.dictionaryFromJSON(retortFileContent);
+            Dictionary<string, string> result = utilJson.DictionaryFromJSON(retortFileContent);
             if (result != null)
             {
                 _retorts = result;
@@ -136,7 +136,7 @@ namespace VoicyBot1.model
                 _logger.LogError("Add - Given question is empty.");
                 return false;
             }
-            else if (String.IsNullOrWhiteSpace(answer))
+            if (String.IsNullOrWhiteSpace(answer))
             {
                 _logger.LogError("Add - Given answer is empty.");
                 return false;
@@ -154,17 +154,14 @@ namespace VoicyBot1.model
 
             var path = utilResource.PathToResource("retorts");
 
-            var convertedJson = utilJson.dictionaryToJSON(_retorts);
+            var convertedJson = utilJson.DictionaryToJSON(_retorts);
             if (convertedJson != null)
             {
                 File.WriteAllText(path, convertedJson);
                 return true;
             }
-            else
-            {
-                _logger.LogError("Add - converted JSON of dictionary was null");
-                return false;
-            }
+            _logger.LogError("Add - converted JSON of dictionary was null");
+            return false;
         }
 
         /// <summary>

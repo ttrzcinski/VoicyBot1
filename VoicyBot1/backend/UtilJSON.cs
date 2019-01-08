@@ -14,10 +14,19 @@ namespace VoicyBot1.backend
         /// </summary>
         /// <param name="json">given JSON</param>
         /// <returns>full dictionary means, finished conversion, null means error</returns>
-        public Dictionary<string, string> dictionaryFromJSON(string json)
+        public Dictionary<string, string> DictionaryFromJSON(string json)
         {
             if (String.IsNullOrWhiteSpace(json)) return null;
-            Dictionary<string, string> elements = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            Dictionary<string, string> elements = null;
+            try
+            {
+                elements = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            }
+            catch (Exception)
+            {
+                elements = null;
+            }
+
             return elements != null && elements.Count > 0 ? elements : null;
         }
 
@@ -26,7 +35,7 @@ namespace VoicyBot1.backend
         /// </summary>
         /// <param name="dictionary">given dictionary</param>
         /// <returns>json of dictionary, if it had content, null otherwise</returns>
-        public string dictionaryToJSON(Dictionary<string, string> dictionary)
+        public string DictionaryToJSON(Dictionary<string, string> dictionary)
         {
             if (dictionary == null || dictionary.Count == 0) return null;
             return JsonConvert.SerializeObject(dictionary, Formatting.Indented);
