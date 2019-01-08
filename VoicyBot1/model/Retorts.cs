@@ -10,6 +10,13 @@ namespace VoicyBot1.model
 {
     public class Retorts
     {
+        /// <summary>
+        /// toolbox with resource methods.
+        /// </summary>
+        private UtilResource utilResource;
+        /// <summary>
+        /// Toolbox with JSON methods.
+        /// </summary>
         private UtilJSON utilJson;
         /// <summary>
         /// Kept decitionary of retorts
@@ -35,6 +42,7 @@ namespace VoicyBot1.model
             _logger = loggerFactory.CreateLogger<Retorts>();
             _logger.LogTrace("Retorts initialized.");
 
+            utilResource = new UtilResource();
             utilJson = new UtilJSON();
             Load();
         }
@@ -44,7 +52,6 @@ namespace VoicyBot1.model
         /// </summary>
         private void AssureNotNull_retorts()
         {
-            _logger.LogInformation("AssureNotNull_retorts was initialized.");
             if (_retorts == null)
             {
                 _retorts = new Dictionary<string, string>();
@@ -52,10 +59,19 @@ namespace VoicyBot1.model
         }
 
         /// <summary>
-        /// Prepares retorts filepath.
+        /// Clears dictionary.
         /// </summary>
-        /// <returns>retorts filepath</returns>
-        private string PrepareFilePath() => Path.Combine(Directory.GetCurrentDirectory(), "resources\\retorts.json");
+        private void Clear()
+        {
+            if (_retorts == null)
+            {
+                _retorts = new Dictionary<string, string>();
+            }
+            else
+            {
+                _retorts.Clear();
+            }
+        }
 
         /// <summary>
         /// Loads retorts from file.
@@ -63,17 +79,10 @@ namespace VoicyBot1.model
         private void Load()
         {
             // Check, if retorts were already loaded
-            if (_retorts == null)
-            {
-                AssureNotNull_retorts();
-            }
-            else
-            {
-                _retorts.Clear();
-            }
+            Clear();
 
             // Check, if retorts file is present
-            var path = PrepareFilePath();
+            var path = utilResource.PathToResource("retorts");
             _logger.LogInformation("Load will be using file " + path);
             if (!File.Exists(path))
             {
@@ -143,7 +152,7 @@ namespace VoicyBot1.model
 
             _retorts.Add(question, answer);
 
-            var path = PrepareFilePath();
+            var path = utilResource.PathToResource("retorts");
 
             var convertedJson = utilJson.dictionaryToJSON(_retorts);
             if (convertedJson != null)
@@ -165,17 +174,26 @@ namespace VoicyBot1.model
         /// <returns>response, if there is one, null otherwise</returns>
         public string Respond(string question)
         {
+            // Checked entered questino
+            if (String.IsNullOrWhiteSpace(question)) return null;
+            
+            // Prepare response
             string response = null;
-            _logger.LogInformation("Respond - working with retorts.");
-            foreach (KeyValuePair<string, string> retort in _retorts)
+            // Check, if it is not one of commands
+            if (question.StartsWith("add-retort|", System.StringComparison.Ordinal))
             {
-                _logger.LogInformation("Respond - working with retort: " + retort.ToString());
-                if (retort.Key.Equals(question))
-                {
-                    _logger.LogInformation("Respond - worked comparison for retort: " + retort.Key.ToString());
-                    response = retort.Value;
-                    break;
-                }
+                return Add(question)
+                    ? "Added new retort."
+                    : "Couldn't process " + question;
+            }
+            // Check, if retorts are loaded
+            if (_retorts.Count == 0) return "Respond - Retorts are emopty.";
+            // Process with retorts
+            _logger.LogInformation("Respond - working with retorts.");
+            if (_retorts.ContainsKey(question))
+            {
+                _logger.LogInformation("Respond - working with retort: " + question + " and answer " + _retorts[question]);
+                return _retorts[question];
             }
 
             return response;

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace VoicyBot1.backend
 {
     /// <summary>
-    /// Holds methods usagle with JSON processing.
+    /// Holds methods usable with JSON processing.
     /// </summary>
     public class UtilJSON
     {

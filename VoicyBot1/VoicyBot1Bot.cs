@@ -1,9 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Connector;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using VoicyBot1.model;
@@ -25,7 +29,10 @@ namespace VoicyBot1
     {
         private readonly VoicyBot1Accessors _accessors;
         private readonly ILogger _logger;
+
         private readonly Retorts _retorts;
+        private readonly Images _images;
+        private readonly Translation _translation;
         
         /// <summary>
         /// Initializes a new instance of the class.
@@ -45,7 +52,11 @@ namespace VoicyBot1
             _accessors = accessors ?? throw new System.ArgumentNullException(nameof(accessors));
 
             _retorts = new Retorts(loggerFactory);
+            _translation = new Translation();
+            _images = new Images();
         }
+
+        
 
         /// <summary>
         /// Every conversation turn for our Echo Bot will call this method.
@@ -81,22 +92,24 @@ namespace VoicyBot1
 
                 // Echo back to the user whatever they typed.
                 var requestContent = turnContext.Activity.Text.ToLower().Trim();
-                var responseMessage = $"Turn {state.TurnCount}: You sent '{turnContext.Activity.Text}'\n";
 
                 // Start operating with those retorts
-                if (requestContent.StartsWith("add-retort|", System.StringComparison.Ordinal))
+                string responseMessage = _retorts.Respond(requestContent);
+                // Start checking tranalation
+                //responseMessage = responseMessage == null ? _translation.Translate(requestContent) : null;
+                // Start operating with images
+                if (responseMessage == null && requestContent.StartsWith("show-image|", System.StringComparison.Ordinal))
                 {
-                    responseMessage = _retorts.Add(requestContent)
-                        ? "Added new retort."
-                        : "Couldn't process " + requestContent;
-                } else {
-                    responseMessage = _retorts.Respond(requestContent) ?? responseMessage;
+                    await _images.ShowImage(turnContext.Activity, "Author");
                 }
-
-                await turnContext.SendActivityAsync(responseMessage);
+                else
+                {
+                    responseMessage = responseMessage ?? $"Turn {state.TurnCount}: You sent '{turnContext.Activity.Text}'\n";
+                    await turnContext.SendActivityAsync(responseMessage);
+                }
             }
             else
-            {
+            {   
                 await turnContext.SendActivityAsync($"{turnContext.Activity.Type} event detected");
             }
         }
