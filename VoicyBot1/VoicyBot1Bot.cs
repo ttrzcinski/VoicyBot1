@@ -1,17 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using VoicyBot1.model;
 
 namespace VoicyBot1
@@ -89,8 +83,15 @@ namespace VoicyBot1
                 var requestContent = turnContext.Activity.Text.ToLower().Trim();
                 var responseMessage = $"Turn {state.TurnCount}: You sent '{turnContext.Activity.Text}'\n";
 
-                // Start operating with those questions
-                responseMessage = _retorts.Respond(requestContent) ?? responseMessage;
+                // Start operating with those retorts
+                if (requestContent.StartsWith("add-retort|", System.StringComparison.Ordinal))
+                {
+                    responseMessage = _retorts.Add(requestContent)
+                        ? "Added new retort."
+                        : "Couldn't process " + requestContent;
+                } else {
+                    responseMessage = _retorts.Respond(requestContent) ?? responseMessage;
+                }
 
                 await turnContext.SendActivityAsync(responseMessage);
             }
