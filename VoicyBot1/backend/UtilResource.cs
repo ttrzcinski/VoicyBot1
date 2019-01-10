@@ -23,7 +23,7 @@ namespace VoicyBot1.backend
         /// </summary>
         /// <param name="name">watned name</param>
         /// <returns>true means, it exists, false otherwise</returns>
-        public bool exists(string name)
+        public bool Exists(string name)
         {
             var path = PathToResource(name);
             return path != null ? File.Exists(path) : false;

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using VoicyBot1.backend;
-using Xunit;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace VoicyBot1Tests.backend
