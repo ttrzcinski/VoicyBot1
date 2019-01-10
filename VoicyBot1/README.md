@@ -97,3 +97,10 @@ If you are new to Microsoft Azure, please refer to [Getting started with Azure][
 [130]: https://github.com/Microsoft/botbuilder-tools/tree/master/packages/MSBot
 [140]: https://portal.azure.com
 [150]: https://www.luis.ai
+
+# TODOs:
+* Cover core functinality with Unit Tests in xUnit.
+* Cover core flows with some sort of transcript or saved discussion integration tests.
+* Add basic dialog with choice buttons Yes/No and process the answer.
+* Add proactive actions from bot a-like timer since last sent message and some private question after time timeout event
+* Add TTS to messages with usage of SSML.
