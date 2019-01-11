@@ -9,11 +9,11 @@ namespace VoicyBot1Tests.backend
         public void Now_Test()
         {
             // Arrange
-            var utilTime = new UtilTime();
+            var utilTime = UtilTime.Instance;
             var expectedLength = 12;
 
             // Act
-            var result = utilTime.Now;
+            var result = UtilTime.Now;
 
             // Assert
             Assert.NotNull(result);
@@ -25,11 +25,11 @@ namespace VoicyBot1Tests.backend
         public void Today_Test()
         {
             // Arrange
-            var utilTime = new UtilTime();
+            var utilTime = UtilTime.Instance;
             var expectedLength = 8;
 
             // Act
-            var result = utilTime.Today;
+            var result = UtilTime.Today;
 
             // Assert
             Assert.NotNull(result);

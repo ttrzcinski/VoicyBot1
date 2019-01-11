@@ -34,6 +34,7 @@ namespace VoicyBot1
         private readonly VoicyBot1Accessors _accessors;
         private readonly ILogger _logger;
 
+        private readonly QuestionsAboutTime _questionsAboutTime;
         private readonly Retorts _retorts;
         private readonly Images _images;
         private readonly Translation _translation;
@@ -55,12 +56,11 @@ namespace VoicyBot1
             _logger.LogTrace("Turn start.");
             _accessors = accessors ?? throw new System.ArgumentNullException(nameof(accessors));
 
+            _questionsAboutTime = new QuestionsAboutTime();
             _retorts = new Retorts(loggerFactory);
             _translation = new Translation();
             _images = new Images();
         }
-
-        
 
         /// <summary>
         /// Every conversation turn for our Echo Bot will call this method.
@@ -115,18 +115,31 @@ namespace VoicyBot1
                     return;
                 }
 
+                // Start with checking questions about the time
+                string responseMessage = _questionsAboutTime.Respond(requestContent);
                 // Start operating with those retorts
-                string responseMessage = _retorts.Respond(requestContent);
-                // Start checking tranalation
-                //responseMessage = responseMessage == null ? _translation.Translate(requestContent) : null;
-                // Start operating with images
                 if (responseMessage == null)
                 {
+                    responseMessage = _retorts.Respond(requestContent);
+                }
+                // Start checking tranalation
+                //responseMessage = responseMessage == null ? _translation.Translate(requestContent) : null;
+                // If answer was given
+                if (responseMessage != null)
+                {
+                    await turnContext.SendActivityAsync(responseMessage);
+                    return;
+                }
+                // Start operating with images
+                if (responseMessage == null && _images.IsToProcess(requestContent))
+                {
                     await _images.ShowImage(turnContext.Activity, requestContent);
+                    return;
                 }
                 if (responseMessage == null)
                 {
                     await turnContext.SendActivityAsync(responseMessage ?? $"Turn {state.TurnCount}: You sent '{turnContext.Activity.Text}'\n");
+                    return;
                 }
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate)

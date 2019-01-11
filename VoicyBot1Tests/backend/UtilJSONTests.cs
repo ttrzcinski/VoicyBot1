@@ -25,7 +25,7 @@ namespace VoicyBot1Tests.backend
         public void DictionaryFromJSON_resultTest(string json, int size, bool expectsValue)
         {
             // Arrange
-            var utilJson = new UtilJSON();
+            var utilJson = UtilJSON.Instance;
             var expected = new Dictionary<string, string>();
             for (int i = 1; i <= size; i++)
             {
@@ -56,7 +56,7 @@ namespace VoicyBot1Tests.backend
         public void DictionaryFromJSON_typeTest()
         {
             // Arrange
-            var utilJson = new UtilJSON();
+            var utilJson = UtilJSON.Instance;
             var json = "{\"q1\":\"a1\"}";
 
             // Act
@@ -77,7 +77,7 @@ namespace VoicyBot1Tests.backend
         public void DictionaryToJSON_resultTest(string value, bool expectsResult)
         {
             // Arrange
-            var utilJson = new UtilJSON();
+            var utilJson = UtilJSON.Instance;
             Dictionary<string, string> processed = null;
             switch (value)
             {
@@ -123,7 +123,7 @@ namespace VoicyBot1Tests.backend
         public void DictionaryToJSON_typeTest()
         {
             // Arrange
-            var utilJson = new UtilJSON();
+            var utilJson = UtilJSON.Instance;
             var json = "{\"q1\":\"a1\"}";
 
             // Act

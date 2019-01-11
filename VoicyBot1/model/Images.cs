@@ -18,16 +18,26 @@ namespace VoicyBot1.model
                 _utilRequest = UtilRequest.Instance;
         }
 
+        /// <summary>
+        /// Checks, if given line can be processed.
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public bool IsToProcess(string message) => 
+            string.IsNullOrWhiteSpace(message) ? false : message.Trim().ToLower().StartsWith("show-image|", StringComparison.Ordinal);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="activity"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public async Task<HttpResponseMessage> ShowImage([Microsoft.AspNetCore.Mvc.FromBody] Activity activity, string message)
         {
-            // Check, if line is empty
-            if (string.IsNullOrWhiteSpace(message)) return null;
-            // Trim message and 
-            string entered = message.Trim().ToLower();
-            // Check, if message contains a command show image
-            if (!entered.StartsWith("show-image|", StringComparison.Ordinal)) return null;
+            // Check, if line can be processed
+            if (!IsToProcess(message)) return null;
             // Leave only passed url or phrase
-            entered = entered.Substring("show-image|".Length);
+            var entered = message.Trim().ToLower().Substring("show-image|".Length);
             // Assert presence of util to process requests
             AssureNN_UtilRequest();
 

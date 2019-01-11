@@ -99,8 +99,11 @@ If you are new to Microsoft Azure, please refer to [Getting started with Azure][
 [150]: https://www.luis.ai
 
 # TODOs:
-* Cover core functinality with Unit Tests in xUnit.
+* Cover core functionality with Unit Tests in xUnit.
 * Cover core flows with some sort of transcript or saved discussion integration tests.
 * Add basic dialog with choice buttons Yes/No and process the answer.
 * Add proactive actions from bot a-like timer since last sent message and some private question after time timeout event
 * Add TTS to messages with usage of SSML.
+* Add custom dialogs with kept handle and reaction in current flow - mandatory for must-answer and optional for meh-later
+* Add something to show cats images
+* Add welcome message - with 3 examples, randomization and checking if it is not the last one used.
