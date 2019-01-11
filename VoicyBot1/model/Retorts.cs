@@ -42,7 +42,7 @@ namespace VoicyBot1.model
             _logger = loggerFactory.CreateLogger<Retorts>();
             _logger.LogTrace("Retorts initialized.");
 
-            utilResource = new UtilResource();
+            utilResource = UtilResource.Instance;
             utilJson = new UtilJSON();
             Load();
         }
@@ -82,7 +82,7 @@ namespace VoicyBot1.model
             Clear();
 
             // Check, if retorts file is present
-            var path = utilResource.PathToResource("retorts");
+            var path = utilResource.PathToResource("retorts.json");
             _logger.LogInformation("Load will be using file " + path);
             if (!File.Exists(path))
             {
@@ -113,7 +113,7 @@ namespace VoicyBot1.model
         /// <returns>true, if added, false means error with logged reason.</returns>
         public bool Add(string fromLine)
         {
-            if (String.IsNullOrWhiteSpace(fromLine))
+            if (string.IsNullOrWhiteSpace(fromLine))
             {
                 _logger.LogError("Add - Given line was empty.");
                 return false;
@@ -131,12 +131,12 @@ namespace VoicyBot1.model
         /// <returns>true means added, false means error with logged reason.</returns>
         public bool Add(string question, string answer)
         {
-            if (String.IsNullOrWhiteSpace(question))
+            if (string.IsNullOrWhiteSpace(question))
             {
                 _logger.LogError("Add - Given question is empty.");
                 return false;
             }
-            if (String.IsNullOrWhiteSpace(answer))
+            if (string.IsNullOrWhiteSpace(answer))
             {
                 _logger.LogError("Add - Given answer is empty.");
                 return false;
@@ -152,7 +152,7 @@ namespace VoicyBot1.model
 
             _retorts.Add(question, answer);
 
-            var path = utilResource.PathToResource("retorts");
+            var path = utilResource.PathToResource("retorts.json");
 
             var convertedJson = utilJson.DictionaryToJSON(_retorts);
             if (convertedJson != null)
@@ -172,7 +172,7 @@ namespace VoicyBot1.model
         public string Respond(string question)
         {
             // Checked entered questino
-            if (String.IsNullOrWhiteSpace(question)) return null;
+            if (string.IsNullOrWhiteSpace(question)) return null;
             
             // Prepare response
             string response = null;
@@ -189,7 +189,7 @@ namespace VoicyBot1.model
             _logger.LogInformation("Respond - working with retorts.");
             if (_retorts.ContainsKey(question))
             {
-                _logger.LogInformation("Respond - working with retort: " + question + " and answer " + _retorts[question]);
+                _logger.LogInformation(string.Format("Respond - working with retort: {0} and answer {1}.", question, _retorts[question]));
                 return _retorts[question];
             }
 

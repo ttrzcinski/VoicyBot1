@@ -13,6 +13,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Connector;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
+using VoicyBot1.backend;
 using VoicyBot1.model;
 
 namespace VoicyBot1
@@ -32,6 +33,8 @@ namespace VoicyBot1
     {
         private readonly VoicyBot1Accessors _accessors;
         private readonly ILogger _logger;
+
+        private readonly UtilRequest _utilRequests;
 
         private readonly Retorts _retorts;
         private readonly Images _images;
@@ -53,6 +56,8 @@ namespace VoicyBot1
             _logger = loggerFactory.CreateLogger<VoicyBot1Bot>();
             _logger.LogTrace("Turn start.");
             _accessors = accessors ?? throw new System.ArgumentNullException(nameof(accessors));
+
+            _utilRequests = UtilRequest.Instance;
 
             _retorts = new Retorts(loggerFactory);
             _translation = new Translation();
@@ -102,8 +107,7 @@ namespace VoicyBot1
                 var requestContent = turnContext.Activity.Text.ToLower().Trim();
 
                 // Start with those numbers
-                var isNumeric = int.TryParse(requestContent, out int num);
-                if (isNumeric == true && num > 0 && num < 4)
+                if (UtilRequest.IsNumber(_utilRequests, requestContent))
                 {
                     // Take the input from the user and create the appropriate response.
                     var reply = ProcessInput(turnContext);
@@ -120,15 +124,13 @@ namespace VoicyBot1
                 // Start checking tranalation
                 //responseMessage = responseMessage == null ? _translation.Translate(requestContent) : null;
                 // Start operating with images
-                if (responseMessage == null && requestContent.StartsWith("show-image|", System.StringComparison.Ordinal))
+                if (responseMessage == null)
                 {
-                    await _images.ShowImage(turnContext.Activity, requestContent.Substring("show-image|".Length));
-                    return;
+                    await _images.ShowImage(turnContext.Activity, requestContent);
                 }
                 else
                 {
-                    responseMessage = responseMessage ?? $"Turn {state.TurnCount}: You sent '{turnContext.Activity.Text}'\n";
-                    await turnContext.SendActivityAsync(responseMessage);
+                    await turnContext.SendActivityAsync(responseMessage ?? $"Turn {state.TurnCount}: You sent '{turnContext.Activity.Text}'\n");
                 }
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
@@ -231,28 +233,27 @@ namespace VoicyBot1
         private static void HandleOutgoingAttachment(IMessageActivity activity, IMessageActivity reply)
         {
             // Look at the user input, and figure out what kind of attachment to send.
-            if (activity.Text.StartsWith("1"))
+            switch (activity.Text)
             {
-                reply.Text = "This is an inline attachment.";
-                reply.Attachments = new List<Attachment>() { GetInlineAttachment() };
-            }
-            else if (activity.Text.StartsWith("2"))
-            {
-                reply.Text = "This is an attachment from a HTTP URL.";
-                reply.Attachments = new List<Attachment>() { GetInternetAttachment() };
-            }
-            else if (activity.Text.StartsWith("3"))
-            {
-                reply.Text = "This is an uploaded attachment.";
+                case "1":
+                    reply.Text = "This is an inline attachment.";
+                    reply.Attachments = new List<Attachment>() { GetInlineAttachment() };
+                    break;
+                case "2":
+                    reply.Text = "This is an attachment from a HTTP URL.";
+                    reply.Attachments = new List<Attachment>() { GetInternetAttachment() };
+                    break;
+                case "3":
+                    reply.Text = "This is an uploaded attachment.";
 
-                // Get the uploaded attachment.
-                var uploadedAttachment = GetUploadedAttachmentAsync(reply.ServiceUrl, reply.Conversation.Id).Result;
-                reply.Attachments = new List<Attachment>() { uploadedAttachment };
-            }
-            else
-            {
-                // The user did not enter input that this bot was built to handle.
-                reply.Text = "Your input was not recognized please try again.";
+                    // Get the uploaded attachment.
+                    var uploadedAttachment = GetUploadedAttachmentAsync(reply.ServiceUrl, reply.Conversation.Id).Result;
+                    reply.Attachments = new List<Attachment>() { uploadedAttachment };
+                    break;
+                default:
+                    // The user did not enter input that this bot was built to handle.
+                    reply.Text = "Your input was not recognized please try again.";
+                    break;
             }
         }
 

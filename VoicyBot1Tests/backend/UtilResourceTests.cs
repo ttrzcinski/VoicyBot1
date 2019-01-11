@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using VoicyBot1.backend;
+﻿using VoicyBot1.backend;
 using Xunit;
 
 namespace VoicyBot1Tests.backend
@@ -9,11 +7,11 @@ namespace VoicyBot1Tests.backend
     {
         [Theory]
         [InlineData(null, null)]
-        [InlineData("str", "resources\\str.json")]
+        [InlineData("str.json", "resources\\str.json")]
         public void PathToResource_Test(string entered, string outcome)
         {
             // Arrange
-            var utilResource = new UtilResource();
+            var utilResource = UtilResource.Instance;
 
             // Act
             var result = utilResource.PathToResource(entered);
@@ -35,11 +33,11 @@ namespace VoicyBot1Tests.backend
         [InlineData("", false)]
         [InlineData("    ", false)]
         [InlineData("  aimpossiblenameofresourcewhichdoesntexists  ", false)]
-        [InlineData("retorts", true)]// TODO fix to read from current directory of the bot, not the tests
+        [InlineData("retorts.json", true)]
         public void Exists_Test(string entered, bool outcome)
         {
             // Arrange
-            var utilResource = new UtilResource();
+            var utilResource = UtilResource.Instance;
 
             // Act
             var result = utilResource.Exists(entered);
