@@ -43,7 +43,7 @@ namespace VoicyBot1.model
             _logger.LogTrace("Retorts initialized.");
 
             utilResource = UtilResource.Instance;
-            utilJson = new UtilJSON();
+            utilJson = UtilJSON.Instance;
             Load();
         }
 

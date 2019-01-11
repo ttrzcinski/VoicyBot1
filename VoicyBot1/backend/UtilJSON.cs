@@ -7,8 +7,23 @@ namespace VoicyBot1.backend
     /// <summary>
     /// Holds methods usable with JSON processing.
     /// </summary>
-    public class UtilJSON
+    public sealed class UtilJSON
     {
+        /// <summary>
+        /// Object for lazy initialization. 
+        /// </summary>
+        private static readonly Lazy<UtilJSON> lazy = new Lazy<UtilJSON>(() => new UtilJSON());
+
+        /// <summary>
+        /// Returns the only instance of this class.
+        /// </summary>
+        public static UtilJSON Instance { get { return lazy.Value; } }
+
+        /// <summary>
+        /// Creates new instance of util JSON - only once as it is singleton.
+        /// </summary>
+        private UtilJSON() { }
+
         /// <summary>
         /// Coverts JSON to dictionary.
         /// </summary>

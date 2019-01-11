@@ -34,8 +34,6 @@ namespace VoicyBot1
         private readonly VoicyBot1Accessors _accessors;
         private readonly ILogger _logger;
 
-        private readonly UtilRequest _utilRequests;
-
         private readonly Retorts _retorts;
         private readonly Images _images;
         private readonly Translation _translation;
@@ -56,8 +54,6 @@ namespace VoicyBot1
             _logger = loggerFactory.CreateLogger<VoicyBot1Bot>();
             _logger.LogTrace("Turn start.");
             _accessors = accessors ?? throw new System.ArgumentNullException(nameof(accessors));
-
-            _utilRequests = UtilRequest.Instance;
 
             _retorts = new Retorts(loggerFactory);
             _translation = new Translation();
@@ -107,7 +103,7 @@ namespace VoicyBot1
                 var requestContent = turnContext.Activity.Text.ToLower().Trim();
 
                 // Start with those numbers
-                if (UtilRequest.IsNumber(_utilRequests, requestContent))
+                if (UtilRequest.IsNumber(requestContent))
                 {
                     // Take the input from the user and create the appropriate response.
                     var reply = ProcessInput(turnContext);
@@ -128,7 +124,7 @@ namespace VoicyBot1
                 {
                     await _images.ShowImage(turnContext.Activity, requestContent);
                 }
-                else
+                if (responseMessage == null)
                 {
                     await turnContext.SendActivityAsync(responseMessage ?? $"Turn {state.TurnCount}: You sent '{turnContext.Activity.Text}'\n");
                 }
