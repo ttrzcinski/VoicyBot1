@@ -16,7 +16,7 @@ namespace VoicyBot1.backend
         /// <returns>full dictionary means, finished conversion, null means error</returns>
         public Dictionary<string, string> DictionaryFromJSON(string json)
         {
-            if (String.IsNullOrWhiteSpace(json)) return null;
+            if (string.IsNullOrWhiteSpace(json)) return null;
             Dictionary<string, string> elements = null;
             try
             {
@@ -35,10 +35,7 @@ namespace VoicyBot1.backend
         /// </summary>
         /// <param name="dictionary">given dictionary</param>
         /// <returns>json of dictionary, if it had content, null otherwise</returns>
-        public string DictionaryToJSON(Dictionary<string, string> dictionary)
-        {
-            if (dictionary == null || dictionary.Count == 0) return null;
-            return JsonConvert.SerializeObject(dictionary, Formatting.Indented);
-        }
+        public string DictionaryToJSON(Dictionary<string, string> dictionary) => 
+            dictionary == null || dictionary.Count == 0 ? null : JsonConvert.SerializeObject(dictionary, Formatting.Indented);
     }
 }
