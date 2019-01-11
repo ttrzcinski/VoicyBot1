@@ -17,6 +17,17 @@
       "type": "abs",
       "id": "3",
       "name": "VoicyBot1"
+    },
+    {
+      "type": "appInsights",
+      "id": "4",
+      "name": "attachments-Insights"
+    },
+    {
+      "type": "blob",
+      "id": "5",
+      "name": "attachments-Blob",
+      "container": "botstatestore"
     }
   ]
 }
