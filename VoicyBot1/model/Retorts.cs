@@ -1,14 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 using VoicyBot1.backend;
+using VoicyBot1.backend.interfaces;
 
 namespace VoicyBot1.model
 {
-    public class Retorts
+    public class Retorts : ISkill
     {
         /// <summary>
         /// toolbox with resource methods.

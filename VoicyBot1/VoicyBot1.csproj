@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="backend\utils\" />
     <Folder Include="resources\imgs\" />
   </ItemGroup>
 </Project>

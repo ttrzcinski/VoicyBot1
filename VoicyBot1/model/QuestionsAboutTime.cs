@@ -1,8 +1,9 @@
 ﻿using VoicyBot1.backend;
+using VoicyBot1.backend.interfaces;
 
 namespace VoicyBot1.model
 {
-    public class QuestionsAboutTime
+    public class QuestionsAboutTime : ISkill
     {
         /// <summary>
         /// Responds with an answer, if it is about time.

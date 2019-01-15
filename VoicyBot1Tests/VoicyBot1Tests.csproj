@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="model\" />
+    <Folder Include="backend\utils\" />
   </ItemGroup>
 
 </Project>
