@@ -56,17 +56,30 @@ namespace VoicyBot1Tests.model
             Assert.Equal(_d20.LastScore(), score);
         }
 
-        [Fact]
-        public void RespondTest()
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData("", false)]
+        [InlineData("   ", false)]
+        [InlineData("  ddd  ", false)]
+        [InlineData("d20 roll", true)]
+        public void RespondTest(string command, bool expectedResult)
         {
             // Arrange
 
             // Act
-            var result = _d20.Respond("d20 roll");
-            var isNumeric = int.TryParse(result, out int n);
+            var result = _d20.Respond(command);
 
             // Assert
-            Assert.True(isNumeric);
+            if (expectedResult == true)
+            {
+                Assert.NotNull(result);
+                var isNumeric = int.TryParse(result, out int n);
+                Assert.True(isNumeric);
+            }
+            else
+            {
+                Assert.Null(result);
+            }
         }
     }
 }
