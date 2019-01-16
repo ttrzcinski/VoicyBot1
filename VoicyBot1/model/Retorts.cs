@@ -26,19 +26,17 @@ namespace VoicyBot1.model
         private readonly ILogger _logger;
 
         /// <summary>
+        /// Holds all the errors, which occured in the run.
+        /// </summary>
+        private List<string> _errors;
+
+        /// <summary>
         /// Initializes a new instance of Retorts.
         /// </summary>
-        /// <param name="loggerFactory">A <see cref="ILoggerFactory"/> that is hooked to the Azure App Service provider.</param>
-        /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
-        public Retorts(ILoggerFactory loggerFactory)
+        public Retorts()
         {
-            if (loggerFactory == null)
-            {
-                throw new System.ArgumentNullException(nameof(loggerFactory));
-            }
-
-            _logger = loggerFactory.CreateLogger<Retorts>();
-            _logger.LogTrace("Retorts initialized.");
+            AssureNotNull_retorts();
+            AssureNotNull_errors();
 
             utilResource = UtilResource.Instance;
             utilJson = UtilJSON.Instance;
@@ -51,9 +49,16 @@ namespace VoicyBot1.model
         private void AssureNotNull_retorts()
         {
             if (_retorts == null)
-            {
                 _retorts = new Dictionary<string, string>();
-            }
+        }
+
+        /// <summary>
+        /// Checks, if loaded retorts are null and initalizes them.
+        /// </summary>
+        private void AssureNotNull_errors()
+        {
+            if (_errors == null)
+                _errors = new List<string>();
         }
 
         /// <summary>
@@ -72,6 +77,16 @@ namespace VoicyBot1.model
         }
 
         /// <summary>
+        /// Is used to log down errors.
+        /// </summary>
+        /// <param name="line">given line to log</param>
+        private void error(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                _errors.Add(line);
+        }
+
+        /// <summary>
         /// Loads retorts from file.
         /// </summary>
         private void Load()
@@ -81,26 +96,22 @@ namespace VoicyBot1.model
 
             // Check, if retorts file is present
             var path = utilResource.PathToResource("retorts.json");
-            _logger.LogInformation("Load will be using file " + path);
             if (!File.Exists(path))
             {
-                _logger.LogError("Load - Couldn't load retorts file - file is missing.");
+                error("Load - Couldn't load retorts file - file is missing.");
                 return;
             }
 
-            _logger.LogInformation("Load - Initialized empty list of retorts.");
             // Load retors from a file
             string retortFileContent = File.ReadAllText(path);
-            _logger.LogInformation("Load - Reads - " + retortFileContent);
             Dictionary<string, string> result = utilJson.DictionaryFromJSON(retortFileContent);
             if (result != null)
             {
                 _retorts = result;
-                _logger.LogInformation("Load was done with retorts: " + _retorts.Count);
             }
             else
             {
-                _logger.LogInformation("Load was cancelled due malformed JSON.");
+                error("Load was cancelled due malformed JSON.");
             }
         }
 
@@ -113,7 +124,7 @@ namespace VoicyBot1.model
         {
             if (string.IsNullOrWhiteSpace(fromLine))
             {
-                _logger.LogError("Add - Given line was empty.");
+                error("Add - Given line was empty.");
                 return false;
             }
 
@@ -131,12 +142,12 @@ namespace VoicyBot1.model
         {
             if (string.IsNullOrWhiteSpace(question))
             {
-                _logger.LogError("Add - Given question is empty.");
+                error("Add - Given question is empty.");
                 return false;
             }
             if (string.IsNullOrWhiteSpace(answer))
             {
-                _logger.LogError("Add - Given answer is empty.");
+                error("Add - Given answer is empty.");
                 return false;
             }
 
@@ -144,7 +155,7 @@ namespace VoicyBot1.model
 
             if (_retorts.ContainsKey(question))
             {
-                _logger.LogError("Add - Given key already exists.");
+                error("Add - Given key already exists.");
                 return false;
             }
 
@@ -158,9 +169,15 @@ namespace VoicyBot1.model
                 File.WriteAllText(path, convertedJson);
                 return true;
             }
-            _logger.LogError("Add - converted JSON of dictionary was null");
+            error("Add - converted JSON of dictionary was null");
             return false;
         }
+
+        // TODO ADD REMOVE
+
+        // TODO ADD save to file
+
+        // TODO ADD LIST ALL ERRORS
 
         /// <summary>
         /// Responds with an answer, if there is one in retorts.
@@ -184,10 +201,9 @@ namespace VoicyBot1.model
             // Check, if retorts are loaded
             if (_retorts.Count == 0) return "Respond - Retorts are emopty.";
             // Process with retorts
-            _logger.LogInformation("Respond - working with retorts.");
             if (_retorts.ContainsKey(question))
             {
-                _logger.LogInformation(string.Format("Respond - working with retort: {0} and answer {1}.", question, _retorts[question]));
+                error(string.Format("Respond - working with retort: {0} and answer {1}.", question, _retorts[question]));
                 return _retorts[question];
             }
 

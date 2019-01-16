@@ -26,23 +26,23 @@ namespace VoicyBot1.model
         /// <summary>
         /// Checks, if given line can be processed.
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="line">given line</param>
         /// <returns></returns>
-        public bool IsToProcess(string message) => 
-            string.IsNullOrWhiteSpace(message) ? false : message.Trim().ToLower().StartsWith("show-image|", StringComparison.Ordinal);
+        public bool IsToProcess(string line) => 
+            string.IsNullOrWhiteSpace(line) ? false : line.Trim().ToLower().StartsWith("show-image|", StringComparison.Ordinal);
 
         /// <summary>
-        /// 
+        /// Shows image based on given phraase.
         /// </summary>
-        /// <param name="activity"></param>
-        /// <param name="message"></param>
+        /// <param name="activity">current activity</param>
+        /// <param name="phraase">given phrase</param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> ShowImage([Microsoft.AspNetCore.Mvc.FromBody] Activity activity, string message)
+        public async Task<HttpResponseMessage> ShowImage([Microsoft.AspNetCore.Mvc.FromBody] Activity activity, string phraase)
         {
             // Check, if line can be processed
-            if (!IsToProcess(message)) return null;
+            if (!IsToProcess(phraase)) return null;
             // Leave only passed url or phrase
-            var entered = message.TrimStart().ToLower().Substring("show-image|".Length).Trim();
+            var entered = phraase.TrimStart().ToLower().Substring("show-image|".Length).Trim();
             // Assert presence of util to process requests
             AssureNN_UtilRequest();
 
@@ -84,7 +84,7 @@ namespace VoicyBot1.model
             }
 
             await connector.Conversations.ReplyToActivityAsync(reply);
-            return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
+            return new HttpResponseMessage(HttpStatusCode.Accepted);
         }
 
         /// <summary>

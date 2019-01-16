@@ -1,13 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
+using VoicyBot1.backend.interfaces;
 
 namespace VoicyBot1.model
 {
-    public class Translation
+    public class Translation : ISkill
     {
+        public string Respond(string question)
+        {
+            if (string.IsNullOrWhiteSpace(question)) return null;
+            question = question.Trim().ToLower();
+            // TODO ADD CHECK OF LENGTH of question
+            if (!question.StartsWith("translate|", StringComparison.Ordinal)) return null;
+            question = question.Substring("translate|".Length);
+
+            string result = null;
+
+            string languagePair = "en|de";
+
+            try
+            {
+                string url = String.Format("http://www.google.com/translate_t?hl=en&ie=UTF8&text={0}&langpair={1}", question, languagePair);
+                var webClient = new WebClient();
+                webClient.Encoding = System.Text.Encoding.UTF8;
+                var response = webClient.DownloadString(url);
+                if (response.Contains("<span title=\"") && response.Contains("</span>"))
+                {
+                    response = response.Substring(response.IndexOf("<span title=\"", StringComparison.Ordinal) +
+                                              "<span title=\"".Length);
+                    response = response.Substring(response.IndexOf(">", StringComparison.Ordinal) + 1);
+                    response = response.Substring(0, response.IndexOf("</span>", StringComparison.Ordinal));
+                    result = response.Trim();
+                }
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine("Couldn't translate" + exc);
+                result = null;
+            }
+
+            return result;
+        }
+
         public string Translate(string command, string coreLang = "auto")
         {
             if (String.IsNullOrWhiteSpace(command)) return null;

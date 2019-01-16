@@ -8,6 +8,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using VoicyBot1.backend;
+using VoicyBot1.backend.states;
 using VoicyBot1.model;
 
 namespace VoicyBot1
@@ -25,6 +26,8 @@ namespace VoicyBot1
     /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1"/>
     public class VoicyBot1Bot : IBot
     {
+        private bool _debug = false;
+
         private readonly VoicyBot1Accessors _accessors;
         private readonly ILogger _logger;
 
@@ -52,7 +55,7 @@ namespace VoicyBot1
             _accessors = accessors ?? throw new ArgumentNullException(nameof(accessors));
 
             _questionsAboutTime = new QuestionsAboutTime();
-            _retorts = new Retorts(loggerFactory);
+            _retorts = new Retorts();
             _d20 = new D20();
             _translation = new Translation();
             _images = new Images();
@@ -83,30 +86,54 @@ namespace VoicyBot1
             // see https://aka.ms/about-bot-activity-message to learn more about the message and other activity types
             if (turnContext.Activity.Type is ActivityTypes.Message)
             {
-                // Get the conversation state from the turn context.
-                var state = await _accessors.CounterState.GetAsync(turnContext, () => new CounterState());
+                // Get the state properties from the turn context.
+                UserProfile userProfile =
+                    await _accessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
+                ConversationData conversationData =
+                    await _accessors.ConversationDataAccessor.GetAsync(turnContext, () => new ConversationData());
 
-                // Bump the turn count for this conversation.
-                state.TurnCount++;
-
-                // Set the property using the accessor.
-                await _accessors.CounterState.SetAsync(turnContext, state);
-
-                // Save the new turn count into the conversation state.
-                //await _accessors.ConversationState.SaveChangesAsync(turnContext);
-
-                // Echo back to the user whatever they typed.
+                // Simplify request for eaasier comparison
                 var requestContent = turnContext.Activity.Text.ToLower().Trim();
+                if (string.IsNullOrEmpty(userProfile.Name))
+                {
+                    // First time around this is set to false, so we will prompt user for name.
+                    if (conversationData.PromptedUserForName)
+                    {
+                        // Set the name to what the user provided.
+                        userProfile.Name = requestContent;
+                        // Acknowledge that we got their name.
+                        await turnContext.SendActivityAsync($"Thanks {userProfile.Name}.");
+                        // Reset the flag to allow the bot to go though the cycle again.
+                        conversationData.PromptedUserForName = false;
+                    }
+                    else
+                    {
+                        // Prompt the user for their name.
+                        await turnContext.SendActivityAsync($"What is your name?");
+                        // Set the flag to true, so we don't prompt in the next turn.
+                        conversationData.PromptedUserForName = true;
+                    }
 
+                    // Save user state and save changes.
+                    await _accessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+                    await _accessors.UserState.SaveChangesAsync(turnContext);
+
+                    // Update conversation state and save changes.
+                    await _accessors.ConversationDataAccessor.SetAsync(turnContext, conversationData);
+                    await _accessors.ConversationState.SaveChangesAsync(turnContext);
+
+                    return;
+                }
+
+                // TODO CHECK, IF THERE WAS A QUESTION, WHERE NUMBER MUST BE PROVIDED AFTER
                 // Start with those numbers
                 if (UtilRequest.IsNumber(requestContent))
                 {
                     // Take the input from the user and create the appropriate response.
                     var reply = Images.ProcessInput(turnContext);
-
                     // Respond to the user.
                     await turnContext.SendActivityAsync(reply, cancellationToken);
-
+                    // Show a custom dialog with images upload
                     await Images.DisplayOptionsAsync(turnContext, cancellationToken);
                     return;
                 }
@@ -115,22 +142,21 @@ namespace VoicyBot1
                 string responseMessage = _questionsAboutTime.Respond(requestContent);
 
                 // Start operating with D20
-                if (responseMessage == null)
-                {
-                    responseMessage = _d20.Respond(requestContent);
-                }
-
+                if (responseMessage == null) responseMessage = _d20.Respond(requestContent);
                 // Start operating with those retorts
-                if (responseMessage == null)
-                {
-                    responseMessage = _retorts.Respond(requestContent);
-                }
+                if (responseMessage == null) responseMessage = _retorts.Respond(requestContent);
                 // Start checking tranalation
-                //responseMessage = responseMessage == null ? _translation.Translate(requestContent) : null;
-                // If answer was given
+                if (responseMessage == null) responseMessage = _translation.Respond(requestContent);
+                // If answer was given as text
                 if (responseMessage != null)
                 {
-                    await turnContext.SendActivityAsync(responseMessage);
+                    await turnContext.SendActivityAsync($"{responseMessage}");
+                    // Show additional meta data about the message, if debug is on
+                    if (_debug)
+                    {
+                        Debug debug = new Debug(conversationData, userProfile, _accessors);
+                        debug.ShowMetaDataAsync(turnContext);
+                    }
                     return;
                 }
                 // Start operating with images
@@ -141,7 +167,7 @@ namespace VoicyBot1
                 }
                 if (responseMessage == null)
                 {
-                    await turnContext.SendActivityAsync(responseMessage ?? $"Turn {state.TurnCount}: You sent '{turnContext.Activity.Text}'\n");
+                    await turnContext.SendActivityAsync(responseMessage ?? $"Turn: You sent '{turnContext.Activity.Text}'\n");
                     return;
                 }
             }

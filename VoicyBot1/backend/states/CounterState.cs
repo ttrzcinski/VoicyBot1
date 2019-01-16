@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
-
 namespace VoicyBot1
 {
     /// <summary>
@@ -17,7 +15,5 @@ namespace VoicyBot1
         /// </summary>
         /// <value>The number of turns in the conversation.</value>
         public int TurnCount { get; set; } = 0;
-
-        public string name;
     }
 }
