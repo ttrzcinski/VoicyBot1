@@ -161,23 +161,36 @@ namespace VoicyBot1.model
 
             _retorts.Add(question, answer);
 
-            var path = utilResource.PathToResource("retorts.json");
+            return SaveToFile();
+        }
 
+        /// <summary>
+        /// Removes pointed retort.
+        /// </summary>
+        /// <param name="question">given retort to remove</param>
+        /// <returns>true means removed, false otherwise</returns>
+        public bool Remove(string question)
+        {
+            if (string.IsNullOrWhiteSpace(question)) return false;
+            return _retorts.Remove(question.Trim().ToLower()) ? SaveToFile() : false;
+        }
+
+        /// <summary>
+        /// Saves currently kept retorts to file.
+        /// </summary>
+        /// <returns>true means saved, false otherwise</returns>
+        public bool SaveToFile()
+        {
             var convertedJson = utilJson.DictionaryToJSON(_retorts);
             if (convertedJson != null)
             {
+                var path = utilResource.PathToResource("retorts.json");
                 File.WriteAllText(path, convertedJson);
                 return true;
             }
             error("Add - converted JSON of dictionary was null");
             return false;
         }
-
-        // TODO ADD REMOVE
-
-        // TODO ADD save to file
-
-        // TODO ADD LIST ALL ERRORS
 
         /// <summary>
         /// Responds with an answer, if there is one in retorts.
@@ -188,18 +201,22 @@ namespace VoicyBot1.model
         {
             // Checked entered questino
             if (string.IsNullOrWhiteSpace(question)) return null;
-            
+            question = question.Trim().ToLower();
+
             // Prepare response
             string response = null;
-            // Check, if it is not one of commands
+            // Check, if it is add retort
             if (question.StartsWith("add-retort|", System.StringComparison.Ordinal))
             {
-                return Add(question)
-                    ? "Added new retort."
-                    : "Couldn't process " + question;
+                return Add(question) ? "Added new retort." : "Couldn't process " + question;
             }
             // Check, if retorts are loaded
-            if (_retorts.Count == 0) return "Respond - Retorts are emopty.";
+            if (_retorts != null && _retorts.Count == 0) return "Respond - Retorts are empty.";
+            // Check, if it is remove retort
+            if (question.StartsWith("remove-retort|", System.StringComparison.Ordinal))
+            {
+                return Remove(question) ? "Removed the retort." : "Couldn't remove the retort.";
+            }
             // Process with retorts
             if (_retorts.ContainsKey(question))
             {
@@ -209,5 +226,11 @@ namespace VoicyBot1.model
 
             return response;
         }
+
+        /// <summary>
+        /// Lists all the errors, which occured during the talk.
+        /// </summary>
+        /// <returns>list of errors, if there are some, null otherwise</returns>
+        public List<string> ListErrors() => (_errors != null || _errors.Count > 0) ? _errors : null;
     }
 }
