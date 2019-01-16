@@ -42,7 +42,7 @@ namespace VoicyBot1.model
             // Check, if line can be processed
             if (!IsToProcess(message)) return null;
             // Leave only passed url or phrase
-            var entered = message.Trim().ToLower().Substring("show-image|".Length);
+            var entered = message.TrimStart().ToLower().Substring("show-image|".Length).Trim();
             // Assert presence of util to process requests
             AssureNN_UtilRequest();
 
