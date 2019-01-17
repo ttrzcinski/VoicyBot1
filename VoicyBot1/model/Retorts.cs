@@ -8,6 +8,15 @@ namespace VoicyBot1.model
 {
     public class Retorts : ISkill
     {
+        private readonly string FileName_Prod = "retorts.json";
+        private readonly string FileName_Dev = "retorts_dev.json";
+        private readonly string FileName_Test = "retorts_test.json";
+
+        /// <summary>
+        /// Currently used file name for retorts.
+        /// </summary>
+        private string _fileName;
+
         /// <summary>
         /// toolbox with resource methods.
         /// </summary>
@@ -20,10 +29,6 @@ namespace VoicyBot1.model
         /// Kept decitionary of retorts
         /// </summary>
         private Dictionary<string, string> _retorts;
-        /// <summary>
-        /// Standard logger used for debug.
-        /// </summary>
-        private readonly ILogger _logger;
 
         /// <summary>
         /// Holds all the errors, which occured in the run.
@@ -33,8 +38,26 @@ namespace VoicyBot1.model
         /// <summary>
         /// Initializes a new instance of Retorts.
         /// </summary>
-        public Retorts()
+        /// <param name="env">shortcut of wanted environment</param>
+        public Retorts(string env = "prod")
         {
+            // Set the right file of retorts
+            switch (env)
+            {
+                case "prod":
+                    _fileName = FileName_Prod;
+                    break;
+                case "dev":
+                    _fileName = FileName_Dev;
+                    break;
+                case "test":
+                    _fileName = FileName_Test;
+                    break;
+                default:
+                    _fileName = FileName_Prod;
+                    break;
+            }
+
             AssureNotNull_retorts();
             AssureNotNull_errors();
 
@@ -48,8 +71,7 @@ namespace VoicyBot1.model
         /// </summary>
         private void AssureNotNull_retorts()
         {
-            if (_retorts == null)
-                _retorts = new Dictionary<string, string>();
+            if (_retorts == null) _retorts = new Dictionary<string, string>();
         }
 
         /// <summary>
@@ -57,14 +79,13 @@ namespace VoicyBot1.model
         /// </summary>
         private void AssureNotNull_errors()
         {
-            if (_errors == null)
-                _errors = new List<string>();
+            if (_errors == null) _errors = new List<string>();
         }
 
         /// <summary>
         /// Clears dictionary.
         /// </summary>
-        private void Clear()
+        public void Clear()
         {
             if (_retorts == null)
             {
@@ -95,7 +116,7 @@ namespace VoicyBot1.model
             Clear();
 
             // Check, if retorts file is present
-            var path = utilResource.PathToResource("retorts.json");
+            var path = utilResource.PathToResource(_fileName);
             if (!File.Exists(path))
             {
                 error("Load - Couldn't load retorts file - file is missing.");
@@ -125,6 +146,18 @@ namespace VoicyBot1.model
             if (string.IsNullOrWhiteSpace(fromLine))
             {
                 error("Add - Given line was empty.");
+                return false;
+            }
+            if (!fromLine.StartsWith("add-retort|", System.StringComparison.Ordinal))
+            {
+                error("Add - Given line has wrong beginning.");
+                return false;
+            }
+
+            if (fromLine.Contains("|") 
+                && Equals(fromLine.IndexOf("|", System.StringComparison.Ordinal), fromLine.LastIndexOf("|", System.StringComparison.Ordinal)))
+            {
+                error("Add - Given line has only one |.");
                 return false;
             }
 
@@ -167,12 +200,38 @@ namespace VoicyBot1.model
         /// <summary>
         /// Removes pointed retort.
         /// </summary>
-        /// <param name="question">given retort to remove</param>
+        /// <param name="question">given command to call remvoe retort</param>
         /// <returns>true means removed, false otherwise</returns>
         public bool Remove(string question)
         {
-            if (string.IsNullOrWhiteSpace(question)) return false;
-            return _retorts.Remove(question.Trim().ToLower()) ? SaveToFile() : false;
+            if (string.IsNullOrWhiteSpace(question))
+            {
+                error("Remove - Given line was empty.");
+                return false;
+            }
+            question = question.Trim().ToLower();
+            if (!question.StartsWith("remove-retort|", System.StringComparison.Ordinal))
+            {
+                error("Remove - Given line has wrong beginning.");
+                return false;
+            }
+            question = question.Split("|")[1].Trim();
+            if (string.IsNullOrWhiteSpace(question))
+            {
+                error("Remove - Given command line has no argument.");
+                return false;
+            }
+
+            if (_retorts.ContainsKey(question))
+            {
+                return _retorts.Count == 1 
+                    ? _retorts.Remove(question) 
+                    : (_retorts.Remove(question) 
+                        ? SaveToFile() 
+                        : false);
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -184,12 +243,27 @@ namespace VoicyBot1.model
             var convertedJson = utilJson.DictionaryToJSON(_retorts);
             if (convertedJson != null)
             {
-                var path = utilResource.PathToResource("retorts.json");
+                var path = utilResource.PathToResource(_fileName);
                 File.WriteAllText(path, convertedJson);
                 return true;
             }
             error("Add - converted JSON of dictionary was null");
             return false;
+        }
+
+        /// <summary>
+        /// Checks, if given question exists within retorts.
+        /// </summary>
+        /// <param name="question">given question</param>
+        /// <returns>true means exists, false otherwise</returns>
+        public bool Contains(string question)
+        {
+            // Checked entered question
+            if (string.IsNullOrWhiteSpace(question)) return false;
+            question = question.Trim().ToLower();
+
+            // Check, if key exists
+            return _retorts.ContainsKey(question);
         }
 
         /// <summary>
@@ -199,7 +273,7 @@ namespace VoicyBot1.model
         /// <returns>response, if there is one, null otherwise</returns>
         public string Respond(string question)
         {
-            // Checked entered questino
+            // Checked entered question
             if (string.IsNullOrWhiteSpace(question)) return null;
             question = question.Trim().ToLower();
 
