@@ -194,7 +194,7 @@ namespace VoicyBot1.model
 
             _retorts.Add(question, answer);
 
-            return SaveToFile();
+            return true;
         }
 
         /// <summary>
@@ -222,16 +222,7 @@ namespace VoicyBot1.model
                 return false;
             }
 
-            if (_retorts.ContainsKey(question))
-            {
-                return _retorts.Count == 1 
-                    ? _retorts.Remove(question) 
-                    : (_retorts.Remove(question) 
-                        ? SaveToFile() 
-                        : false);
-            }
-
-            return false;
+            return _retorts.ContainsKey(question) ? _retorts.Remove(question) : false;
         }
 
         /// <summary>
@@ -247,7 +238,7 @@ namespace VoicyBot1.model
                 File.WriteAllText(path, convertedJson);
                 return true;
             }
-            error("Add - converted JSON of dictionary was null");
+            error("SaveToFile - converted JSON of dictionary was null.");
             return false;
         }
 
@@ -300,6 +291,12 @@ namespace VoicyBot1.model
 
             return response;
         }
+
+        /// <summary>
+        /// Count of retorts kept in the dictionary.
+        /// </summary>
+        /// <returns>number of rtorts in</returns>
+        public int Count() => _retorts != null ? _retorts.Count : 0;
 
         /// <summary>
         /// Lists all the errors, which occured during the talk.

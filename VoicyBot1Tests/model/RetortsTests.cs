@@ -60,5 +60,47 @@ namespace VoicyBot1Tests.model
             // Assert
             Assert.Equal(expected, result);
         }
+
+        [Fact]
+        public void ClearTest()
+        {
+            // Arrange
+            var retorts = new Retorts("test");
+            var question = "question1_test";
+            var answer = "defaultAnswer1_test";
+            retorts.Add(question.Trim(), answer);
+            Assert.True(retorts.Count() > 0);
+            var expectedSize = 0;
+
+            // Act
+            retorts.Clear();
+            var actualSize = retorts.Count();
+
+            // Assert
+            Assert.Equal(expectedSize, actualSize);
+        }
+
+        [Theory]
+        [InlineData(null, false, false)]
+        [InlineData("", false, false)]
+        [InlineData("   ", false, false)]
+        [InlineData("  \n  ", false, false)]
+        [InlineData("  question1  ", false, false)]
+        [InlineData("question1", false, false)]
+        [InlineData("question1", true, true)]
+        public void ContainsTest(string question, bool expected, bool existsBefore)
+        {
+            // Arrange
+            var retorts = new Retorts("test");
+            retorts.Clear();
+            var answer = "defaultAnswer1";
+            if (existsBefore) retorts.Add(question.Trim(), answer);
+
+            // Act
+            var result = retorts.Contains(question);
+
+            // Assert
+            Assert.Equal(expected, result);
+        }
     }
 }
