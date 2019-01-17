@@ -81,6 +81,30 @@ namespace VoicyBot1Tests.model
         }
 
         [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CountTest(bool mustHaveEntries)
+        {
+            // Arrange
+            var retorts = new Retorts("test");
+            retorts.Clear();
+            var expectedSize = 0;
+            if (mustHaveEntries)
+            {
+                var question = "question1_test";
+                var answer = "defaultAnswer1_test";
+                Assert.True(retorts.Add(question.Trim(), answer));
+                expectedSize = 1;
+            }
+
+            // Act
+            var actualSize = retorts.Count();
+
+            // Assert
+            Assert.Equal(expectedSize, actualSize);
+        }
+
+        [Theory]
         [InlineData(null, false, false)]
         [InlineData("", false, false)]
         [InlineData("   ", false, false)]
